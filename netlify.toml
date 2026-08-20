@@ -1,15 +1,16 @@
 [build]
-  command = "pip install -r requirements.txt -t netlify/functions"
+  command = "echo 'No build step needed'"
   publish = "static"
 
 [functions]
   directory = "netlify/functions"
-  node_bundler = "esbuild"
+  external_node_modules = ["httpx"]
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
+  to = "/.netlify/functions/api"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/*"

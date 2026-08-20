@@ -170,53 +170,25 @@ async function sendMessage(text) {
             body: JSON.stringify({ message: text, session_id: sessionId }),
         });
 
-        const reader = resp.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let contentDiv = null;
-        let fullContent = '';
+        const data = await resp.json();
+        removeThinkingIndicator();
 
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+        if (data.error) {
+            addMessage('assistant', `错误: ${data.error}`);
+        } else {
+            sessionId = data.session_id;
 
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-                if (!line.startsWith('data: ')) continue;
-                try {
-                    const data = JSON.parse(line.slice(6));
-
-                    switch (data.type) {
-                        case 'session':
-                            sessionId = data.session_id;
-                            break;
-                        case 'step':
-                            removeThinkingIndicator();
-                            if (data.step.type === 'content') {
-                                // Final answer - render as assistant message
-                                addMessage('assistant', data.step.content);
-                            } else {
-                                addStep(stepsContainer, data.step);
-                                if (data.step.type === 'thought') {
-                                    addThinkingIndicator();
-                                }
-                            }
-                            break;
-                        case 'error':
-                            removeThinkingIndicator();
-                            addMessage('assistant', `错误: ${data.message}`);
-                            break;
-                        case 'done':
-                            removeThinkingIndicator();
-                            break;
+            // Show thinking steps
+            if (data.steps) {
+                for (const step of data.steps) {
+                    if (step.type !== 'content') {
+                        addStep(stepsContainer, step);
                     }
-                } catch (e) {
-                    // skip malformed JSON
                 }
             }
+
+            // Show final content
+            addMessage('assistant', data.content);
         }
     } catch (err) {
         removeThinkingIndicator();
@@ -243,18 +215,46 @@ inputEl.addEventListener('input', () => {
 
 demoBtn.addEventListener('click', async () => {
     if (isGenerating) return;
+    setInputEnabled(false);
     demoBtn.textContent = '生成中...';
 
+    const stepsContainer = createStepsContainer();
+    addThinkingIndicator();
+
     try {
-        const resp = await fetch('/api/demo', { method: 'POST' });
+        const resp = await fetch('/api/chat/stream', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: "我是中科大计算机科学与技术专业大三上的学生，绩点3.7/4.0，专业排名前15%，六级550分，有一篇CCF-B会议的在投论文，参加过ACM-ICPC区域赛获铜奖。目标院校是清华、北大、中科院计算所的计算机相关专业。请帮我制定一份详细的保研攻略。",
+                session_id: sessionId,
+            }),
+        });
+
         const data = await resp.json();
-        sessionId = data.session_id;
-        sendMessage(data.input);
+        removeThinkingIndicator();
+
+        if (!data.error) {
+            sessionId = data.session_id;
+            addMessage('user', data.input || "演示输入");
+            if (data.steps) {
+                for (const step of data.steps) {
+                    if (step.type !== 'content') {
+                        addStep(stepsContainer, step);
+                    }
+                }
+            }
+            addMessage('assistant', data.content);
+        } else {
+            addMessage('assistant', `演示失败: ${data.error}`);
+        }
     } catch (err) {
+        removeThinkingIndicator();
         addMessage('assistant', `演示失败: ${err.message}`);
     }
 
     demoBtn.textContent = '一键演示';
+    setInputEnabled(true);
 });
 
 newChatBtn.addEventListener('click', () => {
