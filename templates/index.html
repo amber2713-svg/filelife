@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保研Agent - 自主智能体</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <div class="header-left">
+                <h1>保研Agent</h1>
+                <span class="badge" id="mode-badge">Mock模式</span>
+                <span class="badge">ReAct + Function Calling</span>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary" id="demo-btn">一键演示</button>
+                <button class="btn btn-ghost" id="new-chat-btn">新对话</button>
+            </div>
+        </header>
+
+        <div class="main">
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3>快速输入</h3>
+                    <div class="quick-inputs">
+                        <button class="quick-btn" data-input="我想保研，但还不确定目标院校，帮我分析一下">不确定目标院校</button>
+                        <button class="quick-btn" data-input="我是中科大CS大三，GPA 3.8，想保研清华计算机，请帮我制定攻略">冲刺清华CS</button>
+                        <button class="quick-btn" data-input="帮我写一封给清华NLP方向导师的套磁邮件">写套磁邮件</button>
+                        <button class="quick-btn" data-input="保研面试一般考什么？帮我准备一下">面试准备</button>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <h3>系统状态</h3>
+                    <div class="status-info">
+                        <div class="status-row">
+                            <span>LLM模型</span>
+                            <span id="model-name">-</span>
+                        </div>
+                        <div class="status-row">
+                            <span>API状态</span>
+                            <span id="api-status" class="status-dot offline">未连接</span>
+                        </div>
+                        <div class="status-row">
+                            <span>Agent状态</span>
+                            <span id="agent-status">空闲</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <h3>可用工具</h3>
+                    <div class="tools-list">
+                        <div class="tool-item">web_search</div>
+                        <div class="tool-item">web_fetch</div>
+                        <div class="tool-item">knowledge_base_query</div>
+                        <div class="tool-item">knowledge_base_list</div>
+                        <div class="tool-item">template_render</div>
+                        <div class="tool-item">template_list</div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="chat-area">
+                <div class="messages" id="messages">
+                    <div class="message assistant">
+                        <div class="message-avatar">A</div>
+                        <div class="message-body">
+                            <div class="message-content">
+                                <p>你好！我是保研Agent，一个能自主搜索信息、分析数据、生成攻略的智能助手。</p>
+                                <p>我会通过 <strong>ReAct</strong> 模式工作：思考 → 调用工具 → 观察结果 → 继续思考，直到信息充足后生成攻略。</p>
+                                <p>请告诉我你的情况，或者直接点击"一键演示"查看效果。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <textarea id="user-input" placeholder="输入你的信息，按 Enter 发送..." rows="1"></textarea>
+                        <button class="btn btn-primary" id="send-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
