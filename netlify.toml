@@ -1,16 +1,15 @@
 [build]
-  command = "echo 'No build step needed'"
+  command = "pip install -r requirements.txt -t netlify/functions/vendor"
   publish = "static"
 
 [functions]
   directory = "netlify/functions"
-  external_node_modules = ["httpx"]
+  python_runtime = "python3.11"
 
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api"
   status = 200
-  force = true
 
 [[redirects]]
   from = "/*"
